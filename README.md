@@ -19,10 +19,9 @@ npm run build   # static site in ./out
 
 ## Deploy (Cloudflare Pages)
 
-Connect this GitHub repo in Cloudflare → Workers & Pages → Create → Pages → Connect to Git:
+The Pages project `cropplot` (custom domains `cropplot.com`, `www.cropplot.com`) is deployed with Wrangler:
 
-- Framework preset: **None**
-- Build command: `npm run build`
-- Build output directory: `out`
-
-Then add the custom domains `cropplot.com` and `www.cropplot.com` under the project's **Custom domains** tab.
+```bash
+npx wrangler login   # once
+npm run deploy
+```
