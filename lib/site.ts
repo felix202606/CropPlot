@@ -15,6 +15,7 @@ export type Plan = {
   blurb: string;
   features: string[];
   cta: string;
+  href: string;
   highlighted?: boolean;
 };
 
@@ -31,6 +32,7 @@ export const plans: Plan[] = [
       "Watering and harvest reminders",
     ],
     cta: "Get the app",
+    href: "/#download",
   },
   {
     id: "pro",
@@ -46,6 +48,7 @@ export const plans: Plan[] = [
       "Companion planting grid recommendations",
     ],
     cta: "Start Pro",
+    href: "/api/checkout",
     highlighted: true,
   },
 ];

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { plans } from "@/lib/site";
 
 export function Pricing() {
@@ -39,8 +38,8 @@ export function Pricing() {
               </li>
             ))}
           </ul>
-          <Link
-            href="/#download"
+          <a
+            href={plan.href}
             className={`mt-8 rounded-full px-5 py-3 text-center font-semibold ${
               plan.highlighted
                 ? "bg-sun-400 text-soil-900 hover:bg-white"
@@ -48,7 +47,7 @@ export function Pricing() {
             }`}
           >
             {plan.cta}
-          </Link>
+          </a>
         </div>
       ))}
     </div>
