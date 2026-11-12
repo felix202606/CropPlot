@@ -1,9 +1,15 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'auth_page.dart';
+import 'backend.dart';
 import 'db/garden_db.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await startBackend();
   runApp(const CropPlotApp());
 }
 
@@ -18,8 +24,39 @@ class CropPlotApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E8747)),
         useMaterial3: true,
       ),
-      home: const GardenPage(),
+      home: const AuthGate(),
     );
+  }
+}
+
+class AuthGate extends StatefulWidget {
+  const AuthGate({super.key});
+
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  late final StreamSubscription<AuthState> _auth;
+
+  @override
+  void initState() {
+    super.initState();
+    _auth = backend.auth.onAuthStateChange.listen((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _auth.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (backend.auth.currentSession == null) return const AuthPage();
+    return const GardenPage();
   }
 }
 
@@ -34,15 +71,23 @@ class _GardenPageState extends State<GardenPage> {
   late final Future<GardenDb> _db = GardenDb.open();
   List<Bed> _beds = [];
   List<Planting> _due = [];
+  bool? _pro;
 
   Future<void> _reload() async {
     final db = await _db;
     final beds = await db.beds();
     final due = await db.dueToday();
+    var pro = false;
+    try {
+      pro = await proActive();
+    } catch (_) {
+      pro = false;
+    }
     if (!mounted) return;
     setState(() {
       _beds = beds;
       _due = due;
+      _pro = pro;
     });
   }
 
@@ -62,11 +107,24 @@ class _GardenPageState extends State<GardenPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('CropPlot')),
+      appBar: AppBar(
+        title: const Text('CropPlot'),
+        actions: [
+          IconButton(
+            onPressed: () => backend.auth.signOut(),
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sign out',
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(onPressed: _addBed, child: const Icon(Icons.add)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Text(backend.auth.currentUser?.email ?? ''),
+          const SizedBox(height: 4),
+          Text(_pro == null ? 'Checking plan…' : (_pro! ? 'Pro' : 'Free')),
+          const SizedBox(height: 24),
           Text('Water today', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           if (_due.isEmpty)

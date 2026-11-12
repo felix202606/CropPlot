@@ -24,14 +24,17 @@ export async function verifyStripeSignature(rawBody: string, header: string, sec
   return signatures.some((signature) => signature !== undefined && safeEqual(signature, expected));
 }
 
-export async function stripeForm(secretKey: string, path: string, body: URLSearchParams) {
+const STRIPE_VERSION = "2026-10-28.endive";
+
+export async function stripeForm(secretKey: string, path: string, body: URLSearchParams | string) {
   const response = await fetch(`https://api.stripe.com/v1/${path}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${secretKey}`,
       "Content-Type": "application/x-www-form-urlencoded",
+      "Stripe-Version": STRIPE_VERSION,
     },
-    body,
+    body: typeof body === "string" ? body : body.toString(),
   });
   const json = (await response.json()) as { error?: { message?: string } };
   if (!response.ok) throw new Error(json.error?.message ?? `Stripe ${path} failed`);
@@ -40,7 +43,7 @@ export async function stripeForm(secretKey: string, path: string, body: URLSearc
 
 export async function stripeGet(secretKey: string, path: string) {
   const response = await fetch(`https://api.stripe.com/v1/${path}`, {
-    headers: { Authorization: `Bearer ${secretKey}` },
+    headers: { Authorization: `Bearer ${secretKey}`, "Stripe-Version": STRIPE_VERSION },
   });
   const json = (await response.json()) as { error?: { message?: string } };
   if (!response.ok) throw new Error(json.error?.message ?? `Stripe ${path} failed`);

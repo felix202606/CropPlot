@@ -63,8 +63,19 @@ export async function userFromAccessToken(env: Env, accessToken: string) {
     headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: `Bearer ${accessToken}` },
   });
   if (!response.ok) return null;
-  const user = (await response.json()) as { id?: string };
-  return user.id ? { id: user.id } : null;
+  const user = (await response.json()) as { id?: string; email?: string };
+  return user.id ? { id: user.id, email: user.email ?? null } : null;
+}
+
+export async function subscriptionCustomerByEmail(env: Env, email: string) {
+  if (!configured(env)) return null;
+  const response = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/subscriptions?email=eq.${encodeURIComponent(email)}&select=stripe_customer_id&limit=1`,
+    { headers: headers(env) },
+  );
+  if (!response.ok) return null;
+  const rows = (await response.json()) as { stripe_customer_id: string | null }[];
+  return rows[0]?.stripe_customer_id ?? null;
 }
 
 export async function insertDiagnosis(

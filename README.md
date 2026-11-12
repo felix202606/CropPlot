@@ -18,7 +18,7 @@ npm run build   # static site in ./out
 - `lib/plants.ts` – companion planting matrix, also exported to `supabase/seed.sql`
 - `functions/` – Cloudflare Pages Functions: Stripe Checkout, Stripe webhook, diagnosis photo upload
 - `supabase/migrations` – Postgres schema (profiles, subscriptions, companion matrix JSONB, diagnoses)
-- `mobile/` – Flutter app (iOS + Android) with an on-device sqflite database
+- `mobile/` – Flutter app (iOS + Android). Beds and watering reminders stay in sqflite. Sign-in uses Supabase Auth, and Pro status is read from `subscriptions`.
 
 ## Backend
 
@@ -32,7 +32,7 @@ Apply `supabase/migrations` and `supabase/seed.sql` in the Supabase SQL editor (
 npx wrangler pages secret put STRIPE_SECRET_KEY --project-name cropplot
 ```
 
-Stripe webhook endpoint: `https://cropplot.com/api/stripe-webhook`, events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+Stripe webhook endpoint: `https://cropplot.com/api/stripe-webhook`. Subscribe to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed`, `charge.refunded`, `charge.dispute.created`, and `radar.early_fraud_warning.created`. Checkout uses `STRIPE_PRICE_ID` (CropPlot Pro, $35.99/year). Signed-in app users open the Customer Portal at `GET /api/billing-portal` with a Supabase access token.
 
 Diagnosis photos go to the R2 bucket `cropplot-diagnoses` (binding `DIAGNOSES` in `wrangler.toml`). User avatars use the Supabase Storage bucket `avatars`.
 
@@ -44,6 +44,8 @@ flutter pub get
 flutter test
 flutter run
 ```
+
+Sign in with the same email used at checkout. New accounts must confirm that email before the first sign-in. Pro shows when that email has an active subscription.
 
 ## Deploy (Cloudflare Pages)
 
