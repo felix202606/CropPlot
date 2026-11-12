@@ -15,6 +15,7 @@ class _AuthPageState extends State<AuthPage> {
   final _password = TextEditingController();
   var _creating = false;
   var _busy = false;
+  var _messageIsError = true;
   String? _message;
 
   @override
@@ -28,7 +29,10 @@ class _AuthPageState extends State<AuthPage> {
     final email = _email.text.trim();
     final password = _password.text;
     if (email.isEmpty || password.length < 6) {
-      setState(() => _message = 'Use an email and a password of at least 6 characters.');
+      setState(() {
+        _messageIsError = true;
+        _message = 'Use an email and a password of at least 6 characters.';
+      });
       return;
     }
     setState(() {
@@ -37,17 +41,66 @@ class _AuthPageState extends State<AuthPage> {
     });
     try {
       if (_creating) {
-        final response = await backend.auth.signUp(email: email, password: password);
+        final response = await backend.auth.signUp(
+          email: email,
+          password: password,
+          emailRedirectTo: authRedirect,
+        );
         if (response.session == null && mounted) {
-          setState(() => _message = 'Check your email to confirm the account, then sign in.');
+          setState(() {
+            _messageIsError = false;
+            _message = 'Check your email to confirm the account, then sign in.';
+          });
         }
       } else {
         await backend.auth.signInWithPassword(email: email, password: password);
       }
     } on AuthException catch (error) {
-      if (mounted) setState(() => _message = error.message);
+      if (mounted) {
+        setState(() {
+          _messageIsError = true;
+          _message = error.message;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _message = 'Could not reach CropPlot. Try again.');
+      if (mounted) {
+        setState(() {
+          _messageIsError = true;
+          _message = 'Could not reach CropPlot. Try again.';
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _oauth(OAuthProvider provider) async {
+    setState(() {
+      _busy = true;
+      _message = null;
+    });
+    try {
+      final opened = await signInWith(provider);
+      if (!opened && mounted) {
+        setState(() {
+          _messageIsError = true;
+          _message = 'Could not open the sign-in page.';
+        });
+      }
+    } on AuthException catch (error) {
+      if (mounted) {
+        setState(() {
+          _messageIsError = true;
+          _message = error.message;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _messageIsError = true;
+          _message = 'Could not reach CropPlot. Try again.';
+        });
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -61,10 +114,23 @@ class _AuthPageState extends State<AuthPage> {
           padding: const EdgeInsets.all(24),
           children: [
             const SizedBox(height: 48),
-            Text('CropPlot', style: Theme.of(context).textTheme.headlineMedium),
+            Image.asset('assets/logo.png', height: 72),
             const SizedBox(height: 8),
-            const Text('Sign in with the same email you use at cropplot.com so Pro can unlock.'),
+            const Text('Use the same email as cropplot.com so Pro can unlock.'),
             const SizedBox(height: 24),
+            OutlinedButton(
+              onPressed: _busy ? null : () => _oauth(OAuthProvider.google),
+              child: const Text('Continue with Google'),
+            ),
+            const SizedBox(height: 8),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2B2118)),
+              onPressed: _busy ? null : () => _oauth(OAuthProvider.apple),
+              child: const Text('Continue with Apple'),
+            ),
+            const SizedBox(height: 20),
+            const Text('or use email'),
+            const SizedBox(height: 12),
             TextField(
               controller: _email,
               keyboardType: TextInputType.emailAddress,
@@ -81,7 +147,12 @@ class _AuthPageState extends State<AuthPage> {
             ),
             if (_message != null) ...[
               const SizedBox(height: 12),
-              Text(_message!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                _message!,
+                style: TextStyle(
+                  color: _messageIsError ? Theme.of(context).colorScheme.error : null,
+                ),
+              ),
             ],
             const SizedBox(height: 20),
             FilledButton(

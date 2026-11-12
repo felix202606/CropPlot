@@ -16,7 +16,10 @@ export default function PrivacyPage() {
       </p>
       <h2>Information we collect</h2>
       <ul>
-        <li>Account information: your email address and sign-in details.</li>
+        <li>
+          Account information: your email address, password sign-in, or the name and email
+          shared when you continue with Google or Apple.
+        </li>
         <li>Garden data: beds, plants, reminders, harvest logs and notes you create.</li>
         <li>Photos you submit for pest and disease diagnosis.</li>
         <li>Approximate location, if you enable weather alerts.</li>
@@ -31,8 +34,9 @@ export default function PrivacyPage() {
       <p>We do not sell your personal information.</p>
       <h2>Service providers</h2>
       <p>
-        We use Supabase (database and authentication), Cloudflare (hosting and file storage),
-        Stripe (payments) and weather data providers to operate {site.name}.
+        We use Supabase (database and authentication), Google and Apple (optional one-tap
+        sign-in), Cloudflare (hosting and file storage), Stripe (payments) and weather data
+        providers to operate {site.name}.
       </p>
       <h2>Your choices</h2>
       <p>

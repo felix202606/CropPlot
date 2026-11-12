@@ -15,6 +15,7 @@ export function Footer() {
           <ul className="mt-3 space-y-2 text-sm text-soil-900/70">
             <li><Link href="/#features" className="hover:text-leaf-700">Features</Link></li>
             <li><Link href="/pricing/" className="hover:text-leaf-700">Pricing</Link></li>
+            <li><Link href="/account/" className="hover:text-leaf-700">Account</Link></li>
             <li><Link href="/companion-planting/" className="hover:text-leaf-700">Companion Planting Guide</Link></li>
           </ul>
         </div>
@@ -24,6 +25,7 @@ export function Footer() {
             <li><a href={`mailto:${site.email}`} className="hover:text-leaf-700">Contact</a></li>
             <li><Link href="/privacy/" className="hover:text-leaf-700">Privacy Policy</Link></li>
             <li><Link href="/terms/" className="hover:text-leaf-700">Terms of Service</Link></li>
+            <li><Link href="/admin/" className="hover:text-leaf-700">Admin</Link></li>
           </ul>
         </div>
       </div>

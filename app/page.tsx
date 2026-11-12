@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { DownloadBand } from "@/components/DownloadBand";
+import { HomeHero } from "@/components/HomeHero";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { Pricing } from "@/components/Pricing";
+import { WebBanner } from "@/components/WebBanner";
 import { plants } from "@/lib/plants";
 import { faqs, features, site } from "@/lib/site";
 
@@ -37,41 +40,11 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <WebBanner />
       <section className="relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-gradient-to-b from-leaf-100/70 to-transparent" />
         <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 py-16 md:grid-cols-2 md:py-24">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-leaf-700 ring-1 ring-leaf-200">
-              🌱 Coming soon to iOS & Android
-            </span>
-            <h1 className="mt-5 font-display text-5xl font-semibold leading-[1.05] tracking-tight text-leaf-900 md:text-6xl">
-              Grow more food.
-              <br />
-              Lose fewer plants.
-            </h1>
-            <p className="mt-6 max-w-lg text-lg text-soil-900/75">
-              CropPlot is the smart garden planner for home growers. Map your beds, get
-              watering and harvest reminders, diagnose sick plants with a photo, and get
-              warned before frost hits.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="#download"
-                className="rounded-full bg-leaf-600 px-6 py-3 font-semibold text-white hover:bg-leaf-700"
-              >
-                Start free
-              </Link>
-              <Link
-                href="#features"
-                className="rounded-full bg-white px-6 py-3 font-semibold text-leaf-900 ring-1 ring-soil-100 hover:ring-leaf-200"
-              >
-                See features
-              </Link>
-            </div>
-            <p className="mt-4 text-sm text-soil-900/60">
-              Free forever for unlimited plants. Pro from $35.99/year.
-            </p>
-          </div>
+          <HomeHero />
           <PhoneMockup />
         </div>
       </section>
@@ -197,28 +170,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="download" className="scroll-mt-20 px-5 py-20">
-        <div className="mx-auto max-w-5xl rounded-[2.5rem] bg-leaf-900 px-8 py-16 text-center text-white">
-          <h2 className="font-display text-4xl font-semibold">Your best season starts here</h2>
-          <p className="mx-auto mt-4 max-w-xl text-leaf-100">
-            CropPlot is launching soon on the App Store and Google Play. Want early access?
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <span className="rounded-2xl bg-white/10 px-5 py-3 text-sm ring-1 ring-white/20">
-              App Store · Coming soon
-            </span>
-            <span className="rounded-2xl bg-white/10 px-5 py-3 text-sm ring-1 ring-white/20">
-              ▶ Google Play · Coming soon
-            </span>
-          </div>
-          <a
-            href={`mailto:${site.email}?subject=CropPlot%20early%20access`}
-            className="mt-8 inline-block rounded-full bg-sun-400 px-6 py-3 font-semibold text-soil-900 hover:bg-white"
-          >
-            Join the early access list
-          </a>
-        </div>
-      </section>
+      <DownloadBand />
     </>
   );
 }

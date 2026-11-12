@@ -19,12 +19,17 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/#download"
-          className="rounded-full bg-leaf-600 px-4 py-2 text-sm font-semibold text-white hover:bg-leaf-700"
-        >
-          Get the app
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/account/" className="text-sm font-medium text-soil-900/80 hover:text-leaf-700">
+            Account
+          </Link>
+          <Link
+            href="/#download"
+            className="rounded-full bg-leaf-600 px-4 py-2 text-sm font-semibold text-white hover:bg-leaf-700"
+          >
+            Get the app
+          </Link>
+        </div>
       </div>
     </header>
   );

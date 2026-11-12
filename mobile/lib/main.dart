@@ -71,6 +71,8 @@ class _GardenPageState extends State<GardenPage> {
   late final Future<GardenDb> _db = GardenDb.open();
   List<Bed> _beds = [];
   List<Planting> _due = [];
+  List<AppBanner> _banners = [];
+  String? _invite;
   bool? _pro;
 
   Future<void> _reload() async {
@@ -78,15 +80,29 @@ class _GardenPageState extends State<GardenPage> {
     final beds = await db.beds();
     final due = await db.dueToday();
     var pro = false;
+    var banners = <AppBanner>[];
+    String? invite;
     try {
       pro = await proActive();
     } catch (_) {
       pro = false;
     }
+    try {
+      banners = await liveAppBanners();
+    } catch (_) {
+      banners = [];
+    }
+    try {
+      invite = await inviteCode();
+    } catch (_) {
+      invite = null;
+    }
     if (!mounted) return;
     setState(() {
       _beds = beds;
       _due = due;
+      _banners = banners;
+      _invite = invite;
       _pro = pro;
     });
   }
@@ -108,7 +124,13 @@ class _GardenPageState extends State<GardenPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CropPlot'),
+        title: Row(
+          children: [
+            Image.asset('assets/app_icon.png', height: 28),
+            const SizedBox(width: 8),
+            const Text('CropPlot'),
+          ],
+        ),
         actions: [
           IconButton(
             onPressed: () => backend.auth.signOut(),
@@ -124,6 +146,26 @@ class _GardenPageState extends State<GardenPage> {
           Text(backend.auth.currentUser?.email ?? ''),
           const SizedBox(height: 4),
           Text(_pro == null ? 'Checking plan…' : (_pro! ? 'Pro' : 'Free')),
+          if (_invite != null) ...[
+            const SizedBox(height: 8),
+            Text('Invite friends: cropplot.com/?ref=$_invite'),
+          ],
+          if (_banners.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            ..._banners.map(
+              (banner) => Card(
+                color: const Color(0xFFE7F3EA),
+                child: ListTile(
+                  title: Text(banner.title),
+                  subtitle: Text(banner.body, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => ActivityPage(banner: banner)));
+                  },
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           Text('Water today', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -150,6 +192,30 @@ class _GardenPageState extends State<GardenPage> {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class ActivityPage extends StatelessWidget {
+  const ActivityPage({super.key, required this.banner});
+
+  final AppBanner banner;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(banner.title)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(banner.body),
+          if (banner.ctaLabel != null) ...[
+            const SizedBox(height: 24),
+            Text(banner.ctaLabel!, style: const TextStyle(fontWeight: FontWeight.w600)),
+            if (banner.ctaUrl != null) Text(banner.ctaUrl!),
+          ],
         ],
       ),
     );
